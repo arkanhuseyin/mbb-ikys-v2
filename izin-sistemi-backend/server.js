@@ -3,8 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// 1. ADIM: Ayarları EN BAŞTA yükle (KRİTİK DÜZELTME)
-// Bu satır aşağıdayken veritabanı şifreyi göremiyordu.
+// 1. ADIM: Ayarları EN BAŞTA yükle
 dotenv.config(); 
 
 // 2. ADIM: Ayarlar yüklendikten sonra veritabanını çağır
@@ -18,7 +17,13 @@ const personelRoutes = require('./src/routes/personelRoutes');
 const app = express();
 
 // --- MIDDLEWARE (Ara Katmanlar) ---
-app.use(cors());
+// DÜZELTME BURADA: Frontend'den (Vercel) gelen isteklere tam izin veriyoruz.
+app.use(cors({
+    origin: '*', // Tüm sitelere izin ver (Hata ayıklamak için en garanti yol)
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,7 +35,7 @@ app.use('/api/auth', authRoutes);       // Giriş işlemleri
 app.use('/api/izin', izinRoutes);       // İzin, Onay, Bildirim
 app.use('/api/personel', personelRoutes); // Profil işlemleri
 
-// Test Rotası (Vercel'de çalıştığını anlamak için)
+// Test Rotası
 app.get('/', (req, res) => {
     res.send('Mersin BB İzin & Görev Sistemi API Çalışıyor! 🚀 (Veritabanı Bağlantısı: Aktif)');
 });
