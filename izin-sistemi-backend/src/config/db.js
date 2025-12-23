@@ -1,16 +1,19 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+// Veritabanı bağlantı ayarı
+// Render.com veya .env dosyasındaki DATABASE_URL'i kullanır.
+const connectionString = process.env.DATABASE_URL;
+
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    connectionString: connectionString,
+    ssl: {
+        rejectUnauthorized: false // Neon.tech ve Render için bu SSL ayarı ZORUNLUDUR!
+    }
 });
 
 pool.on('connect', () => {
-    console.log('✅ Veritabanına başarıyla bağlanıldı!');
+    console.log('✅ Canlı Veritabanına (Neon) başarıyla bağlanıldı!');
 });
 
 pool.on('error', (err) => {
