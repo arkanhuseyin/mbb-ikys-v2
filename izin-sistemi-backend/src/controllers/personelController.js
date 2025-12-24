@@ -19,47 +19,35 @@ exports.birimGuncelle = async (req, res) => {
     }
     const { personel_id, yeni_birim_id } = req.body;
     try {
-        // Yazıcı Kısıtlaması
-        if (req.user.rol === 'yazici') {
-            const hedefBirimRes = await pool.query('SELECT birim_adi FROM birimler WHERE birim_id = $1', [yeni_birim_id]);
-            const hedefBirimAdi = hedefBirimRes.rows[0]?.birim_adi || '';
-            const kendiBirimId = req.user.birim; 
-            
-            const isHavuz = hedefBirimAdi.includes('HAVUZ');
-            // (Burada kendi birim kontrolünü şimdilik es geçiyoruz, gerekirse eklenir)
-        }
-
         await pool.query('UPDATE personeller SET birim_id = $1 WHERE personel_id = $2', [yeni_birim_id, personel_id]);
         const birimRes = await pool.query('SELECT birim_adi FROM birimler WHERE birim_id = $1', [yeni_birim_id]);
         res.json({ mesaj: `Personel '${birimRes.rows[0]?.birim_adi}' birimine transfer edildi.` });
     } catch (err) { res.status(500).json({ mesaj: 'Hata oluştu.' }); }
 };
 
-// 3. PERSONELİ DONDUR (Pasife Al) - DÜZELTİLDİ ✅
+// 3. PERSONELİ DONDUR (Pasife Al)
 exports.personelDondur = async (req, res) => {
     if (!['admin', 'ik', 'filo'].includes(req.user.rol)) return res.status(403).json({ mesaj: 'Yetkisiz işlem' });
     
     const { personel_id, neden } = req.body;
     try {
-        // BURADAKİ 'active = FALSE' silindi.
         await pool.query(
             `UPDATE personeller SET aktif = FALSE, ayrilma_nedeni = $1, ayrilma_tarihi = NOW() WHERE personel_id = $2`,
             [neden, personel_id]
         );
         res.json({ mesaj: 'Personel üyeliği donduruldu (Pasife Alındı).' });
     } catch (err) { 
-        console.error(err); // Hatayı görmek için log ekledim
+        console.error(err);
         res.status(500).json({ mesaj: 'Hata oluştu.' }); 
     }
 };
 
-// 4. PERSONELİ AKTİF ET (Geri Döndür) - DÜZELTİLDİ ✅
+// 4. PERSONELİ AKTİF ET
 exports.personelAktifEt = async (req, res) => {
     if (!['admin', 'ik', 'filo'].includes(req.user.rol)) return res.status(403).json({ mesaj: 'Yetkisiz işlem' });
     
     const { personel_id } = req.body;
     try {
-        // BURADAKİ 'active = TRUE' silindi.
         await pool.query(
             `UPDATE personeller SET aktif = TRUE, ayrilma_nedeni = NULL, ayrilma_tarihi = NULL WHERE personel_id = $1`,
             [personel_id]
@@ -80,7 +68,7 @@ exports.rolGuncelle = async (req, res) => {
     } catch (err) { res.status(500).json({ mesaj: 'Hata' }); }
 };
 
-// 6. PERSONEL SİL
+// 6. PERSONEL SİL (GÜNCELLENDİ - TÜM BAĞIMLILIKLAR EKLENDİ) ✅
 exports.personelSil = async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ mesaj: 'Sadece Admin silebilir.' });
     
@@ -99,6 +87,7 @@ exports.personelSil = async (req, res) => {
 
         const user = userRes.rows[0];
 
+        // Güvenlik: Aktif personel silinemez
         if (user.aktif) {
             await client.query('ROLLBACK');
             return res.status(400).json({ 
@@ -106,10 +95,20 @@ exports.personelSil = async (req, res) => {
             });
         }
 
+        // --- TÜM BAĞIMLI KAYITLARI SİL ---
         await client.query('DELETE FROM bildirimler WHERE personel_id = $1', [personel_id]);
         await client.query('DELETE FROM imzalar WHERE personel_id = $1', [personel_id]);
         await client.query('DELETE FROM profil_degisiklikleri WHERE personel_id = $1', [personel_id]);
+        await client.query('DELETE FROM gorevler WHERE personel_id = $1', [personel_id]);
+        await client.query('DELETE FROM yetkiler WHERE personel_id = $1', [personel_id]);
+        
+        // Loglardaki hatayı çözen satır:
+        await client.query('DELETE FROM sistem_loglari WHERE personel_id = $1', [personel_id]);
+
+        // İzin taleplerini ve onlara bağlı hareketleri siler (CASCADE varsa hareketlere gerek kalmaz ama garantiye alalım)
         await client.query('DELETE FROM izin_talepleri WHERE personel_id = $1', [personel_id]);
+        
+        // Son olarak personeli sil
         await client.query('DELETE FROM personeller WHERE personel_id = $1', [personel_id]);
 
         await client.query('COMMIT');
@@ -117,8 +116,8 @@ exports.personelSil = async (req, res) => {
 
     } catch (err) { 
         await client.query('ROLLBACK');
-        console.error("Silme Hatası:", err);
-        res.status(500).json({ mesaj: 'Silme işlemi sırasında hata oluştu.' }); 
+        console.error("Silme Hatası Detay:", err); // Render loglarında detay görmek için
+        res.status(500).json({ mesaj: `Silme işlemi başarısız: ${err.message}` }); 
     } finally {
         client.release();
     }
