@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // 1. GİRİŞ YAP (LOGIN)
+// src/controllers/authController.js
+
+// 1. GİRİŞ YAP (LOGIN)
 exports.login = async (req, res) => {
     const { tc_no, sifre } = req.body;
 
@@ -36,7 +39,7 @@ exports.login = async (req, res) => {
             return res.status(401).json({ mesaj: 'Hatalı şifre!' });
         }
 
-        // --- YENİ EKLENEN KISIM: YETKİLERİ ÇEK ---
+        // --- YETKİLERİ ÇEK ---
         const yetkiResult = await pool.query('SELECT * FROM yetkiler WHERE personel_id = $1', [user.personel_id]);
         const yetkiler = yetkiResult.rows;
 
@@ -44,20 +47,25 @@ exports.login = async (req, res) => {
         const token = jwt.sign(
             { id: user.personel_id, tc: user.tc_no, rol: user.rol_adi },
             process.env.JWT_SECRET || 'gizli_anahtar',
-            { expiresIn: '12h' } // Mobil uyumlu olsun diye süre uzatıldı
+            { expiresIn: '12h' }
         );
 
         // Şifre hash'ini ve hassas bilgileri çıkartıp gönder
         delete user.sifre_hash;
 
+        // 🔴 MOBİL VE WEB UYUMLULUĞU İÇİN ÖZEL OBJE
+        const userObj = {
+            ...user,
+            rol: user.rol_adi, // Mobil uygulama 'rol' bekliyor olabilir
+            yetkiler: yetkiler
+        };
+
         res.json({
-    mesaj: 'Giriş başarılı',
-    token,
-    user: {
-        ...user,
-        rol: user.rol_adi, // <--- ŞİMDİLİK BU SATIRI EKLE (Mobil uygulama için yama)
-        yetkiler: yetkiler
-    }
+            mesaj: 'Giriş başarılı',
+            token,
+            // 👇 KRİTİK NOKTA BURASI 👇
+            user: userObj,       // Yeni Web Sitesi bunu kullanır
+            kullanici: userObj   // Eski Mobil Uygulama bunu kullanır (Bunu eklememiştin)
         });
 
     } catch (err) {
