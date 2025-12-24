@@ -1,34 +1,30 @@
 {
   "expo": {
-    "name": "MBB İzin Sistemi",
-    "slug": "izinsistemi",
+    "name": "MersinBB Izin",
+    "slug": "mbb-izin-yeni-test",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon1.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/icon1.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.huseyin.arkan.izinsistemi"
-    },
+
+    "icon": "./assets/iconn.png",
+
     "android": {
-      "package": "com.huseyin.arkan.izinsistemi",
-      "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/icon1.png",
-        "backgroundColor": "#ffffff"
-      }
+      "package": "com.mbb.yeni.izin.sistemi",
+      "versionCode": 1
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
+
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "resizeMode": "contain",
+          "image": "./assets/iconn.png"
+        }
+      ]
+    ],
+
     "extra": {
       "eas": {
-        "projectId": "440bcb12-2adc-47bc-82fe-5af7a1be2f39"
+        "projectId": "97cdb250-1c6a-426b-833a-777b6065bcc2"
       }
     }
   }
