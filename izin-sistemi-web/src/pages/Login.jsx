@@ -10,25 +10,16 @@ export default function Login() {
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-        const response = await axios.post('https://mersinbb-izin-sistemi.onrender.com/api/auth/login', { tc_no: tcNo, sifre: sifre });
-        
-        // 1. Token'ı kaydet
-        localStorage.setItem('token', response.data.token);
-
-        // 2. DÜZELTME BURADA: 'kullanici' yerine 'user' yazıyoruz
-        // Çünkü Backend (authController.js) veriyi 'user' adıyla gönderiyor.
-        localStorage.setItem('user', JSON.stringify(response.data.user)); 
-
-        // 3. Sayfayı YENİLEYEREK yönlendir (Sol menüdeki ismin gelmesi için bu şart)
-        window.location.href = '/dashboard/home'; 
-
-    } catch (error) {
-        console.error(error); // Hatayı konsola yazdıralım ki görelim
-        setHata('Giriş bilgileri hatalı veya sunucu erişilemiyor.');
-    }
-};
+        e.preventDefault();
+        try {
+            const response = await axios.post('https://mersinbb-izin-sistemi.onrender.com/api/auth/login', { tc_no: tcNo, sifre: sifre });
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            navigate('/dashboard/home'); // Dashboard'un ana sayfasına yönlendir
+        } catch (error) {
+            setHata('Giriş bilgileri hatalı veya sunucu erişilemiyor.');
+        }
+    };
 
     return (
         <div className="d-flex vh-100" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
