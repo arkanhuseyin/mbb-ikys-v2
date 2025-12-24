@@ -51,12 +51,13 @@ exports.login = async (req, res) => {
         delete user.sifre_hash;
 
         res.json({
-            mesaj: 'Giriş başarılı',
-            token,
-            user: {
-                ...user,
-                yetkiler: yetkiler // <--- ARTIK YETKİLER DE GİDİYOR
-            }
+    mesaj: 'Giriş başarılı',
+    token,
+    user: {
+        ...user,
+        rol: user.rol_adi, // <--- ŞİMDİLİK BU SATIRI EKLE (Mobil uygulama için yama)
+        yetkiler: yetkiler
+    }
         });
 
     } catch (err) {

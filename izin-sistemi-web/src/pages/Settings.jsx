@@ -22,7 +22,7 @@ export default function Settings() {
     const [dondurmaModal, setDondurmaModal] = useState(null);
 
     // YETKİ KONTROLÜ
-    const isYetkili = user && ['admin', 'ik', 'filo'].includes(user.rol);
+    const isYetkili = user && ['admin', 'ik', 'filo'].includes(user.rol_adi);
 
     useEffect(() => {
         if(isYetkili) {
@@ -73,7 +73,7 @@ export default function Settings() {
                 yeni_birim_id: selectedBirim
             }, { headers: { Authorization: `Bearer ${token}` } });
 
-            if (selectedRol && selectedRol !== editingUser.rol_adi && user.rol === 'admin') {
+            if (selectedRol && selectedRol !== editingUser.rol_adi && user.rol_adi === 'admin') {
                 await axios.post('https://mersinbb-izin-sistemi.onrender.com/api/personel/rol-degistir', {
                     personel_id: editingUser.personel_id,
                     yeni_rol_adi: selectedRol
@@ -170,7 +170,7 @@ export default function Settings() {
                                     <div className="mb-2"><label className="small fw-bold">TC</label><input className="form-control" value={newUser.tc_no} onChange={e=>setNewUser({...newUser, tc_no:e.target.value})} required maxLength="11"/></div>
                                     <div className="row g-2 mb-2"><div className="col"><label className="small fw-bold">Ad</label><input className="form-control" value={newUser.ad} onChange={e=>setNewUser({...newUser, ad:e.target.value})} required/></div><div className="col"><label className="small fw-bold">Soyad</label><input className="form-control" value={newUser.soyad} onChange={e=>setNewUser({...newUser, soyad:e.target.value})} required/></div></div>
                                     <div className="mb-2"><label className="small fw-bold">Şifre</label><input className="form-control" value={newUser.sifre} onChange={e=>setNewUser({...newUser, sifre:e.target.value})} required/></div>
-                                    <div className="mb-2"><label className="small fw-bold">Rol</label><select className="form-select" value={newUser.rol_adi} onChange={e=>setNewUser({...newUser, rol_adi:e.target.value})}><option value="personel">Personel</option><option value="amir">Amir</option><option value="yazici">Yazıcı</option><option value="ik">İK</option><option value="filo">Filo</option>{user.rol === 'admin' && <option value="admin">Admin</option>}</select></div>
+                                    <div className="mb-2"><label className="small fw-bold">Rol</label><select className="form-select" value={newUser.rol_adi} onChange={e=>setNewUser({...newUser, rol_adi:e.target.value})}><option value="personel">Personel</option><option value="amir">Amir</option><option value="yazici">Yazıcı</option><option value="ik">İK</option><option value="filo">Filo</option>{user.rol_adi === 'admin' && <option value="admin">Admin</option>}</select></div>
                                     <div className="mb-3"><label className="small fw-bold">Birim</label><select className="form-select" value={newUser.birim_id} onChange={e=>setNewUser({...newUser, birim_id:e.target.value})}>{birimler.length === 0 && <option value="">Yükleniyor...</option>}{birimler.map(b => <option key={b.birim_id} value={b.birim_id}>{b.birim_adi}</option>)}</select></div>
                                     <button type="submit" className="btn btn-success w-100 fw-bold">Personeli Kaydet</button>
                                 </form>
