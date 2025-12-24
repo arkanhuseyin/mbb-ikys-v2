@@ -2,7 +2,6 @@ const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// 1. GİRİŞ YAP (LOGIN)
 // src/controllers/authController.js
 
 // 1. GİRİŞ YAP (LOGIN)
@@ -43,9 +42,13 @@ exports.login = async (req, res) => {
         const yetkiResult = await pool.query('SELECT * FROM yetkiler WHERE personel_id = $1', [user.personel_id]);
         const yetkiler = yetkiResult.rows;
 
-        // Token oluştur
+        // ✅ DÜZELTME 1: Token oluştururken rolü KÜÇÜK HARFE çeviriyoruz
         const token = jwt.sign(
-            { id: user.personel_id, tc: user.tc_no, rol: user.rol_adi },
+            { 
+                id: user.personel_id, 
+                tc: user.tc_no, 
+                rol: user.rol_adi.toLowerCase() // BURASI DÜZELDİ
+            },
             process.env.JWT_SECRET || 'gizli_anahtar',
             { expiresIn: '12h' }
         );
@@ -56,7 +59,7 @@ exports.login = async (req, res) => {
         // 🔴 MOBİL VE WEB UYUMLULUĞU İÇİN ÖZEL OBJE
         const userObj = {
             ...user,
-            rol: user.rol_adi, // Mobil uygulama 'rol' bekliyor olabilir
+            rol: user.rol_adi.toLowerCase(), // ✅ DÜZELTME 2: Frontend'e gönderirken de küçültüyoruz
             yetkiler: yetkiler
         };
 
@@ -65,7 +68,7 @@ exports.login = async (req, res) => {
             token,
             // 👇 KRİTİK NOKTA BURASI 👇
             user: userObj,       // Yeni Web Sitesi bunu kullanır
-            kullanici: userObj   // Eski Mobil Uygulama bunu kullanır (Bunu eklememiştin)
+            kullanici: userObj   // Eski Mobil Uygulama bunu kullanır
         });
 
     } catch (err) {
@@ -76,7 +79,6 @@ exports.login = async (req, res) => {
 
 // 2. ŞİFRE SIFIRLAMA TALEBİ (EMAİL OLMADIĞI İÇİN BASİT LOG)
 exports.sifreUnuttum = async (req, res) => {
-    // ... (Eski kodun aynısı)
     res.json({ mesaj: 'Lütfen birim amirinize veya İK departmanına başvurunuz.' });
 };
 
@@ -102,7 +104,6 @@ exports.adminSifirla = async (req, res) => {
 
 // 4. YENİ PERSONEL EKLEME (REGISTER)
 exports.register = async (req, res) => {
-    // ... (Eski kodun aynısı)
     // Yetki kontrolü
     if (req.user.rol !== 'admin' && req.user.rol !== 'ik' && req.user.rol !== 'filo') {
         return res.status(403).json({ mesaj: 'Bu işlemi yapmaya yetkiniz yok.' });
