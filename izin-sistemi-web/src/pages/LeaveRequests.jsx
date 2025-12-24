@@ -109,7 +109,7 @@ export default function LeaveRequests() {
         if (!yol) return null;
         const temizYol = yol.replace(/\\/g, '/');
         const dosyaAdi = temizYol.split('/').pop();
-        return `https://mersinbb-izin-sistemi.vercel.app//uploads/izinler/${dosyaAdi}`;
+        return `https://mersinbb-izin-sistemi.onrender.com/uploads/izinler/${dosyaAdi}`;
     };
 
     const butonGoster = (izin) => {

@@ -59,7 +59,7 @@ export default function ProfilOnay() {
         const temizYol = yol.replace(/\\/g, '/'); 
         const dosyaAdi = temizYol.split('/').pop();
         // Backend 'uploads' klasörünü statik sunuyor
-        return `https://mersinbb-izin-sistemi.vercel.app//uploads/belgeler/${dosyaAdi}`;
+        return `https://mersinbb-izin-sistemi.onrender.com/uploads/belgeler/${dosyaAdi}`;
     };
 
     if (yukleniyor) return <div className="p-5 text-center text-muted">Yükleniyor...</div>;
