@@ -13,7 +13,8 @@ export default function DashboardHome() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        axios.get('https://mersinbb-izin-sistemi.onrender.com/api/izin/listele', { headers: { Authorization: `Bearer ${token}` } })
+        // GÜNCEL URL
+        axios.get('https://mbb-ikys-v2.onrender.com/api/izin/listele', { headers: { Authorization: `Bearer ${token}` } })
             .then(res => {
                 const data = res.data;
                 

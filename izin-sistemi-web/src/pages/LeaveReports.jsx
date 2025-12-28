@@ -10,7 +10,8 @@ export default function LeaveReports() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        axios.get('https://mersinbb-izin-sistemi.onrender.com/api/izin/rapor/durum', { 
+        // GÜNCEL URL
+        axios.get('https://mbb-ikys-v2.onrender.com/api/izin/rapor/durum', { 
             headers: { Authorization: `Bearer ${token}` } 
         })
         .then(res => {

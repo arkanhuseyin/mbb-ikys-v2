@@ -12,7 +12,8 @@ export default function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('https://mersinbb-izin-sistemi.onrender.com/api/auth/login', { tc_no: tcNo, sifre: sifre });
+            // GÜNCEL URL
+            const response = await axios.post('https://mbb-ikys-v2.onrender.com/api/auth/login', { tc_no: tcNo, sifre: sifre });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
             navigate('/dashboard/home'); // Dashboard'un ana sayfasına yönlendir
@@ -30,7 +31,7 @@ export default function Login() {
                     <BusFront size={120} className="mb-4 opacity-75" />
                     <h1 className="display-4 fw-bold">Filo Yönetim Merkezi</h1>
                     <p className="lead opacity-75">Mersin Büyükşehir Belediyesi<br/>Toplu Taşıma Şube Müdürlüğü</p>
-					<p className="lead opacity-75">Hüseyin Arkan<br/></p>
+                    <p className="lead opacity-75">Hüseyin Arkan<br/></p>
                 </div>
             </div>
 

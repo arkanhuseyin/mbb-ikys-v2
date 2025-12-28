@@ -12,7 +12,8 @@ export default function SystemLogs() {
     const verileriCek = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get('https://mersinbb-izin-sistemi.onrender.com/api/izin/system-logs', {
+            // GÜNCEL URL
+            const res = await axios.get('https://mbb-ikys-v2.onrender.com/api/izin/system-logs', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setLogs(res.data);

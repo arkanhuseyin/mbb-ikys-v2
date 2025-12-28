@@ -28,7 +28,8 @@ export default function Yetkilendirme() {
     const fetchUsers = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get('https://mersinbb-izin-sistemi.onrender.com/api/auth/users', { headers: { Authorization: `Bearer ${token}` } });
+            // GÜNCEL URL
+            const res = await axios.get('https://mbb-ikys-v2.onrender.com/api/auth/users', { headers: { Authorization: `Bearer ${token}` } });
             setUsers(res.data || []);
         } catch(e) { console.error(e); }
     };
@@ -37,7 +38,8 @@ export default function Yetkilendirme() {
         setSelectedUser(user);
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`https://mersinbb-izin-sistemi.onrender.com/api/yetki/${user.personel_id}`, { headers: { Authorization: `Bearer ${token}` } });
+            // GÜNCEL URL
+            const res = await axios.get(`https://mbb-ikys-v2.onrender.com/api/yetki/${user.personel_id}`, { headers: { Authorization: `Bearer ${token}` } });
             
             const loadedPerms = {};
             
@@ -63,7 +65,7 @@ export default function Yetkilendirme() {
     const handleCheck = (modulKey, type) => {
         setPermissions(prev => ({
             ...prev,
-            [modulKey]: {
+            modulKey: {
                 ...prev[modulKey],
                 [type]: !prev[modulKey]?.[type]
             }
@@ -83,7 +85,8 @@ export default function Yetkilendirme() {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.post('https://mersinbb-izin-sistemi.onrender.com/api/yetki/kaydet', {
+            // GÜNCEL URL
+            await axios.post('https://mbb-ikys-v2.onrender.com/api/yetki/kaydet', {
                 personel_id: selectedUser.personel_id,
                 yetkiler: yetkiListesi
             }, { headers: { Authorization: `Bearer ${token}` } });

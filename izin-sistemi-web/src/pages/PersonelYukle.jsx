@@ -17,8 +17,8 @@ export default function PersonelYukle() {
                 const wb = XLSX.read(evt.target.result, { type: 'binary' });
                 const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                 const token = localStorage.getItem('token');
-                // URL'yi kendi Render adresinle değiştirmeyi unutma veya config'den çek
-                await axios.post('https://mbb-ikys-v2-backend.onrender.com/api/personel/toplu-yukle', data, {
+                // GÜNCEL URL
+                await axios.post('https://mbb-ikys-v2.onrender.com/api/personel/toplu-yukle', data, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSonuc({ tur: 'basarili', mesaj: `İşlem Tamamlandı! ${data.length} kişi işlendi.` });

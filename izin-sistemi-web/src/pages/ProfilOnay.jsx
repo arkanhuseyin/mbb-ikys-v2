@@ -18,7 +18,8 @@ export default function ProfilOnay() {
 
         try {
             // Sadece Admin/İK/Filo görebilir (Backend kontrolü var)
-            const response = await axios.get('https://mersinbb-izin-sistemi.onrender.com/api/personel/talepler', {
+            // GÜNCEL URL
+            const response = await axios.get('https://mbb-ikys-v2.onrender.com/api/personel/talepler', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTalepler(response.data);
@@ -42,7 +43,8 @@ export default function ProfilOnay() {
         if(!window.confirm(mesaj)) return;
 
         try {
-            await axios.post('https://mersinbb-izin-sistemi.onrender.com/api/personel/talep-islem', { id, islem: tur }, {
+            // GÜNCEL URL
+            await axios.post('https://mbb-ikys-v2.onrender.com/api/personel/talep-islem', { id, islem: tur }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert(`İşlem Başarılı: ${tur === 'ONAYLA' ? 'Onaylandı' : 'Reddedildi'}`);
@@ -59,7 +61,8 @@ export default function ProfilOnay() {
         const temizYol = yol.replace(/\\/g, '/'); 
         const dosyaAdi = temizYol.split('/').pop();
         // Backend 'uploads' klasörünü statik sunuyor
-        return `https://mersinbb-izin-sistemi.onrender.com/uploads/belgeler/${dosyaAdi}`;
+        // GÜNCEL URL
+        return `https://mbb-ikys-v2.onrender.com/uploads/belgeler/${dosyaAdi}`;
     };
 
     if (yukleniyor) return <div className="p-5 text-center text-muted">Yükleniyor...</div>;
