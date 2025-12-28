@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, UserCog, Settings, LogOut, PlusCircle, FileBarChart, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, FileText, UserCog, Settings, LogOut, PlusCircle, FileBarChart, ShieldCheck, FileSpreadsheet } from 'lucide-react';
 
 export default function Sidebar() {
     const navigate = useNavigate();
@@ -73,7 +73,7 @@ export default function Sidebar() {
             path: '/dashboard/yetkilendirme', 
             icon: <ShieldCheck size={20}/>, 
             show: checkPermission('yetkilendirme') // Sadece yetkisi olan görsün
-        }
+        },
     ];
 
     const handleLogout = () => {
