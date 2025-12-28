@@ -49,6 +49,7 @@ export default function Sidebar() {
             icon: <FileText size={20}/>, 
             show: checkPermission('izin_onay')
         },
+        
         { 
             title: 'İzin Takip Raporu', 
             path: '/dashboard/reports', 
@@ -87,6 +88,10 @@ export default function Sidebar() {
                 <div className="bg-primary rounded p-1"><BusFront size={24} className="text-white"/></div>
                 <h5 className="m-0 fw-bold text-primary">Mersin BB</h5>
             </div>
+
+<button onClick={() => navigate('/dashboard/upload-data')} className="btn text-start d-flex align-items-center gap-3 py-2 border-0 w-100">
+    <FileSpreadsheet size={20}/> <span>Veri Yükle</span>
+</button>
 
             <div className="flex-grow-1 overflow-auto">
                 <div className="d-flex flex-column gap-2">

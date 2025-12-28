@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Sidebar from './components/Sidebar';
+import PersonelYukle from './pages/PersonelYukle';
+
 
 // --- SAYFALARIMIZ ---
 import DashboardHome from './pages/DashboardHome'; // Grafikli Ana Ekran (Kokpit)
@@ -51,6 +53,7 @@ function App() {
             <Route path="settings" element={<Settings />} />
             {/* 7. Yetkilendirme Paneli */}
             <Route path="yetkilendirme" element={<Yetkilendirme />} /> {/* <--- 2. YENİ EKLENEN ROTA */}
+            <Route path="upload-data" element={<PersonelYukle />} />
         </Route>
       </Routes>
     </BrowserRouter>

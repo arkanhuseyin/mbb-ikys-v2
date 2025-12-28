@@ -54,6 +54,7 @@ router.post('/rol-degistir', auth, personelController.rolGuncelle);
 // 6. Personel Sil (Sadece Admin - Pasifse Siler)
 router.delete('/sil/:personel_id', auth, personelController.personelSil);
 
+router.post('/toplu-yukle', auth, personelController.topluPersonelYukle);
 
 // ============================================================
 // 🔵 PROFİL VE GÜNCELLEME İŞLEMLERİ (BURADA İŞLENİR)
