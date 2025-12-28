@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'; // useEffect ve useState ekledik
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios'; // Axios ekledik
-// FileSpreadsheet ikonunu import listesine ekledik
+import axios from 'axios';
 import { LayoutDashboard, FileText, UserCog, Settings, LogOut, PlusCircle, FileBarChart, ShieldCheck, FileSpreadsheet } from 'lucide-react';
 
 export default function Sidebar() {
@@ -17,7 +16,7 @@ export default function Sidebar() {
         }
     });
 
-    // --- YENİ EKLENEN KISIM: GÜNCEL YETKİLERİ ÇEKME ---
+    // --- GÜNCEL YETKİLERİ ÇEKME (Her sayfa yenilendiğinde) ---
     useEffect(() => {
         const guncelYetkileriCek = async () => {
             if (!user || !user.personel_id) return;
@@ -43,7 +42,7 @@ export default function Sidebar() {
         };
 
         guncelYetkileriCek();
-    }, []); // Sayfa ilk açıldığında 1 kere çalışır
+    }, []); 
 
     const isActive = (path) => location.pathname === path ? 'bg-primary text-white shadow' : 'text-secondary hover-bg-light';
 
@@ -52,14 +51,14 @@ export default function Sidebar() {
         // 1. Admin ise KESİNLİKLE her yeri görsün
         if (user?.rol_adi === 'admin') return true;
 
-        // 2. Kullanıcının yetkilerine bak (State'den okuyoruz artık)
+        // 2. Kullanıcının yetkilerine bak (State'den okuyoruz)
         const userPermissions = user?.yetkiler || [];
         const permission = userPermissions.find(p => p.modul_adi === modulKey);
 
         // 3. EĞER HİÇ KAYIT YOKSA -> GÖSTER (Varsayılan Açık)
         if (!permission) return true;
 
-        // 4. KAYIT VARSA -> Veritabanındaki ayara bak (True ise göster, False ise gizle)
+        // 4. KAYIT VARSA -> Veritabanındaki ayara bak
         return permission.goruntule === true;
     };
 
@@ -122,10 +121,12 @@ export default function Sidebar() {
                 <h5 className="m-0 fw-bold text-primary">Mersin BB</h5>
             </div>
 
-            {/* Veri Yükle Butonunu da yetkiye bağlayabilirsin veya açık bırakabilirsin */}
-            <button onClick={() => navigate('/dashboard/upload-data')} className="btn text-start d-flex align-items-center gap-3 py-2 border-0 w-100 mb-2 text-secondary hover-bg-light">
-                <FileSpreadsheet size={20}/> <span className="fw-medium">Veri Yükle</span>
-            </button>
+            {/* --- DÜZELTME BURADA: Sadece 'admin' rolü olanlar bu butonu görsün --- */}
+            {user && user.rol_adi === 'admin' && (
+                <button onClick={() => navigate('/dashboard/upload-data')} className="btn text-start d-flex align-items-center gap-3 py-2 border-0 w-100 mb-2 text-secondary hover-bg-light">
+                    <FileSpreadsheet size={20}/> <span className="fw-medium">Veri Yükle</span>
+                </button>
+            )}
 
             <div className="flex-grow-1 overflow-auto">
                 <div className="d-flex flex-column gap-2">
