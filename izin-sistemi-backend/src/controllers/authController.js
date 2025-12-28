@@ -42,7 +42,7 @@ exports.login = async (req, res) => {
         const yetkiResult = await pool.query('SELECT * FROM yetkiler WHERE personel_id = $1', [user.personel_id]);
         const yetkiler = yetkiResult.rows;
 
-        // 🔥 İŞTE EKSİK OLAN PARÇA BURASIYDI: birim eklendi! 🔥
+        // 🔥 Token Oluşturma (Birim ID eklendi) 🔥
         const token = jwt.sign(
             { 
                 id: user.personel_id, 
